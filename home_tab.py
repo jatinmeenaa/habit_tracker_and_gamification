@@ -1,0 +1,1 @@
+''' This module handles funtionality of home tab'''

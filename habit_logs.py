@@ -1,0 +1,1 @@
+''' This module handles funtionality of habit_logs tab'''
