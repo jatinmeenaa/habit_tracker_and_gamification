@@ -6,6 +6,7 @@ from tkinter import ttk
 import user
 import db
 from profile_tab import profile_tab
+from habits_tab import habits_tab 
 
 def dashboard(username):
     dash=tk.Toplevel()
@@ -37,6 +38,7 @@ def dashboard(username):
     profile=ttk.Frame(notebook)
     notebook.add(profile,text='Profile')
 
+    habits_tab(dash,habits,user_instance)
     profile_tab(dash,profile,user_instance)
     
     dash.wait_window()
@@ -45,7 +47,7 @@ def dashboard(username):
 if __name__ == '__main__':
     root = tk.Tk()
     root.withdraw()  # Hide the root window
-    dashboard("alice_smith")  # Open dashboard with a sample username
+    dashboard("john_doe")  # Open dashboard with a sample username
     root.destroy()
     root.mainloop()
 

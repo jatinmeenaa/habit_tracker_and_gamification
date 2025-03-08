@@ -15,12 +15,15 @@ def get_connection():
     )
     return conn
 
-def execute(query,parameter=None):
+def execute(query,parameter=None,dictionary=False):
     ''' function for executing the query and retrieving data 
-    return data type : list of dictionaries'''
+    return data type : list of tuple / list of dictionary'''
 
     conn=get_connection()
-    cursor=conn.cursor(dictionary=True)
+    if dictionary:
+        cursor=conn.cursor(dictionary=True)
+    else:
+        cursor=conn.cursor()
     cursor.execute(query,parameter)
     data=cursor.fetchall()
     conn.commit()
@@ -37,7 +40,7 @@ def get_user(user_id=None,username=None):
     if user_id:
         query='select * from users where user_id=%s'
         parameter=(user_id,)
-        data=execute(query,parameter)
+        data=execute(query,parameter,dictionary=True)
         if data:
             return data[0]
         else:
@@ -45,7 +48,7 @@ def get_user(user_id=None,username=None):
     elif username:
         query='select * from users where username=%s'
         parameter=(username,)
-        data=execute(query,parameter)
+        data=execute(query,parameter,dictionary=True)
         if data:
             return data[0]
         else:
@@ -59,7 +62,7 @@ def get_usernames():
 
     query='select username from users'
     data=execute(query)
-    usernames=[d['username'] for d in data]
+    usernames=data #[d['username'] for d in data]
     return usernames
 
 def delete_user(user_id):
@@ -71,4 +74,13 @@ def delete_user(user_id):
     parameter=(user_id,)
     data=execute(query,parameter)
 
+def get_user_habits(user_id):
+    '''function to get habits of a given user
+    return: list of tuples'''
+
+    query='select u.habit_id, h.habit_name, h.habit_description, h.points_per_day, u.goal,u.frequency,u.is_active from habits h join user_habits u on h.habit_id=u.habit_id where u.user_id=%s'
+    parameter=(user_id,)
+    data=execute(query,parameter)
+    
+    return data
 
