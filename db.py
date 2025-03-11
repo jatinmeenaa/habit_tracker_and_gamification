@@ -78,9 +78,17 @@ def get_user_habits(user_id):
     '''function to get habits of a given user
     return: list of tuples'''
 
-    query='select u.habit_id, h.habit_name, h.habit_description, h.points_per_day, u.goal,u.frequency,u.is_active from habits h join user_habits u on h.habit_id=u.habit_id where u.user_id=%s'
+    query='select u.habit_id, h.habit_name from habits h join user_habits u on h.habit_id=u.habit_id where u.user_id=%s and is_active= True'
     parameter=(user_id,)
     data=execute(query,parameter)
     
     return data
 
+def get_user_habit_info(user_id,habit_id):
+    '''function to get info about habit a particular user have
+    return : dictionary'''
+
+    query='select * from user_habits where user_id =%s and habit_id =%s'
+    parameter=(user_id,habit_id)
+    data=execute(query,parameter,dictionary=True)
+    return data[0]
