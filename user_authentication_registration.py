@@ -36,7 +36,7 @@ def is_user_authentic(username,password):
     parameter=(username,)
     data=db.execute(query,parameter)
     if data:
-        password_hash=data[0]['password_hash']
+        password_hash=data[0][0]
         if bcrypt.checkpw(password.encode(),password_hash.encode()):
             return True
         else :

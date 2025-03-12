@@ -74,12 +74,12 @@ def delete_user(user_id):
     parameter=(user_id,)
     data=execute(query,parameter)
 
-def get_user_habits(user_id):
+def get_user_habits(user_id,active=True):
     '''function to get habits of a given user
     return: list of tuples'''
 
-    query='select u.habit_id, h.habit_name from habits h join user_habits u on h.habit_id=u.habit_id where u.user_id=%s and is_active= True'
-    parameter=(user_id,)
+    query='select u.habit_id, h.habit_name from habits h join user_habits u on h.habit_id=u.habit_id where u.user_id=%s and is_active= %s'
+    parameter=(user_id,active)
     data=execute(query,parameter)
     
     return data
@@ -92,3 +92,25 @@ def get_user_habit_info(user_id,habit_id):
     parameter=(user_id,habit_id)
     data=execute(query,parameter,dictionary=True)
     return data[0]
+
+def edit_user_habit(user_id,habit_id,frequency,goal):
+    '''function to edit frequency and goal of a user habit'''
+
+    query='update user_habits set frequency=%s,goal=%s where user_id =%s and habit_id=%s'
+    parameters=(frequency,goal,user_id,habit_id)
+    data=execute(query,parameters)
+
+def end_user_habit(user_id,habit_id):
+    '''function to end a user habit i.e. deactivating\discontinuing'''
+
+    query='update user_habits set is_active=False,current_streak=0 where user_id =%s and habit_id=%s'
+    parameters=(user_id,habit_id)
+    data=execute(query,parameters)
+
+def start_user_habit(user_id,habit_id):
+    '''function to start a user habit i.e. activating\continuing'''
+
+    query='update user_habits set is_active=True,current_streak=0 where user_id=%s and habit_id=%s'
+    parameters=(user_id,habit_id)
+    data=execute(query,parameters)
+
