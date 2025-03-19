@@ -2,29 +2,101 @@
 
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
 import db
 
 def habits_tab(dash,habits,user_instance):
 
-    def display_info(event):
+    def show_user_habits():
+        '''Modify tab to show user active habits'''
+
+        def action_on_selection(event):
+            display_info(user_active_habits)
+            # action buttons
+            edit_button.grid(row=5,column=0,padx=10,pady=5,sticky='w')
+            end_button.grid(row=6,column=0,padx=10,pady=5,sticky='w')
+        
+        # modify layout
+        create_habit_frame.pack_forget()
+        info_frame.pack(side=tk.LEFT,fill='y')
+        action_frame.pack(side=tk.LEFT,fill=tk.BOTH,expand=True)
+
+        # guide label
+        guide_label.config(text='Show User Habits')
+        # poputating active habits
+        global user_active_habits
+        user_active_habits=db.get_user_habits(user_instance.user_id)
+        populate_habits(user_active_habits)
+        # action when any habit selected
+        habits_listbox.bind('<<ListboxSelect>>',action_on_selection)
+
+    def continue_habits():
+        '''Modify tab to show inactive habits to continue again'''
+
+        def action_on_selection(event):
+            display_info(user_inactive_habits)
+            # action buttons
+            edit_button.grid(row=5,column=0,padx=10,pady=5,sticky='w')
+            start_button.grid(row=6,column=0,padx=10,pady=5,sticky='w')
+        
+        # modify layout
+        create_habit_frame.pack_forget()
+        info_frame.pack(side=tk.LEFT,fill='y')
+        action_frame.pack(side=tk.LEFT,fill=tk.BOTH,expand=True)
+
+        # guide label
+        guide_label.config(text='Continue Inactive Habits')
+        # populating inactive habits
+        global user_inactive_habits
+        user_inactive_habits=db.get_user_habits(user_instance.user_id,False)
+        populate_habits(user_inactive_habits)
+        # action on habit selection
+        habits_listbox.bind('<<ListboxSelect>>',action_on_selection)
+
+    def start_habits():
+        '''Modify tab to show habits to add it to user habits'''
+        
+        def action_on_selection():
+            print('success')
+
+        # modify layout
+        create_habit_frame.pack_forget()
+        info_frame.pack(side=tk.LEFT,fill='y')
+        action_frame.pack(side=tk.LEFT,fill=tk.BOTH,expand=True)
+
+        # guide label
+        guide_label.config(text='Start New Habit')
+        # populating inactive habits
+        global other_habits
+        other_habits=db.get_other_habits(user_instance.user_id)
+        populate_habits(other_habits)
+        # action on habit selection
+        habits_listbox.bind('<<ListboxSelect>>',action_on_selection)
+
+    def create_habits():
+        '''Modify tab to create new habits to add it to user habits later'''
+        
+        # modify layout
+        info_frame.pack_forget()
+        action_frame.pack_forget()
+        create_habit_frame.pack(fill=tk.BOTH,expand=True)
+
+        # guide label
+        guide_label.config(text='Create New Habit')
+
+    def display_info(habit_list):
         index=habits_listbox.curselection()[0]
-        if index >= len(user_active_habits):
+        if index >= len(habit_list):
             return
         
-        selected_habit_id=user_active_habits[index][0]
+        selected_habit_id=habit_list[index][0]
         data=db.get_user_habit_info(user_id=user_instance.user_id,habit_id=selected_habit_id)
         v_habit_id.config(text=data['habit_id'])
         v_streak.config(text=data['current_streak'])
-        v_habit.config(text=user_active_habits[index][1])
+        v_habit.config(text=habit_list[index][1])
         v_freq.config(text=data['frequency'])
         v_goal.config(text=data['goal'])
-
-        edit_button.grid(row=5,column=0,padx=10,pady=5,sticky='w')
-        if guide_label.cget('text')=='Active Habits':
-            end_button.grid(row=6,column=0,padx=10,pady=5,sticky='w')
-        elif guide_label.cget('text')=='Inactive Habits':
-            start_button.grid(row=6,column=0,padx=10,pady=5,sticky='w')
 
     def populate_habits(habits):
         habits_listbox.delete(0,tk.END)
@@ -62,9 +134,9 @@ def habits_tab(dash,habits,user_instance):
 
     def cancel_edit():
         edit_button.grid(row=5,column=0,padx=10,pady=5,sticky='w')
-        if guide_label.cget('text')=='Active Habits':
+        if guide_label.cget('text')=='Show Active Habits':
             end_button.grid(row=6,column=0,padx=10,pady=5,sticky='w')
-        elif guide_label.cget('text')=='Inactive Habits':
+        elif guide_label.cget('text')=='Continue Inactive Habits':
             start_button.grid(row=6,column=0,padx=10,pady=5,sticky='w')
         v_freq.grid(row=2,column=2,columnspan=2,padx=10,pady=5,sticky='w')
         v_goal.grid(row=3,column=2,columnspan=3,padx=10,pady=5,sticky='w')
@@ -72,9 +144,9 @@ def habits_tab(dash,habits,user_instance):
         action_frame.pack_forget()
         action_frame.pack(side=tk.LEFT,fill=tk.BOTH,expand=True)
         edit_freq.grid_forget()
-        edit_freq.config(text=v_freq.cget('text'))
+        #edit_freq.config(text=v_freq.cget('text'))
         edit_goal.grid_forget()
-        edit_goal.insert(tk.END,v_goal.cget('text'))
+        #edit_goal.insert(tk.END,v_goal.cget('text'))
         save_button.grid_forget()
         cancel_button.grid_forget()
 
@@ -98,8 +170,8 @@ def habits_tab(dash,habits,user_instance):
         end_button.grid_forget()
 
     def start_habit():
-        print(user_instance.user_id,v_habit_id.cget('text'))
         db.start_user_habit(user_instance.user_id,v_habit_id.cget('text'))
+
         
         index=habits_listbox.curselection()[0]
         habits_listbox.delete(index)
@@ -112,6 +184,24 @@ def habits_tab(dash,habits,user_instance):
         v_goal.config(text='')
         edit_button.grid_forget()
         start_button.grid_forget()
+        end_button.grid_forget()
+
+    def clear_habit_create():
+        habit_n_entry.delete(0,tk.END)
+        habit_d_text.delete('1.0',tk.END)
+        points_entry.delete(0,tk.END)
+        points_entry.insert(tk.END,'10')
+
+    def create_habit_create():
+        '''command function for create button'''
+
+        habit_name=habit_n_entry.get().strip()
+        habit_description=habit_d_text.get('1.0',tk.END).strip()
+        points_per_day=points_entry.get().strip
+        # error if no type matching
+        db.create_habit(habit_name,habit_description,points_per_day)
+        messagebox.showinfo('Habit Created Successfully',f'New Habit {habit_name} created successfully')
+        clear_habit_create()
 
 
     # styling
@@ -124,7 +214,7 @@ def habits_tab(dash,habits,user_instance):
     options_frame.pack(fill='x')
 
     # creating guiding label
-    guide_label=ttk.Label(options_frame,text='Active Habits')
+    guide_label=ttk.Label(options_frame,text='')
     guide_label.pack(padx=20,pady=10,side='left')
 
     # creating a menubutton
@@ -133,11 +223,13 @@ def habits_tab(dash,habits,user_instance):
 
     #creating menu
     menu=tk.Menu(options,tearoff=0)
-    menu.add_command(label='Continue existing Habit',command= continue_habit)
+    menu.add_command(label='Show User Habits',command= show_user_habits)
     menu.add_separator()
-    menu.add_command(label='Start a Habit',command= lambda : print('success'))
+    menu.add_command(label='Continue existing Habit',command= continue_habits)
     menu.add_separator()
-    menu.add_command(label='Create New Habit',command= lambda : print('success '))
+    menu.add_command(label='Start a Habit',command= start_habits)
+    menu.add_separator()
+    menu.add_command(label='Create New Habit',command= create_habits)
     options.config(menu=menu)
 
     
@@ -146,9 +238,39 @@ def habits_tab(dash,habits,user_instance):
     display_frame=ttk.Frame(habits)
     display_frame.pack(expand=True,fill=tk.BOTH)
     
+    # creating create habit frame
+    create_habit_frame=ttk.Frame(display_frame)
+    create_habit_frame.pack_forget()
+
+    # Row 0 habitname
+    habit_n_label=ttk.Label(create_habit_frame,text='Habit Name :',style='Label.TLabel')
+    habit_n_label.grid(row=0,column=0,padx=10,pady=(30,5),sticky='w')
+    habit_n_entry=ttk.Entry(create_habit_frame,state='Info.TEntry')
+    habit_n_entry.grid(row=0,column=1,padx=10,pady=(30,5),sticky='w')
+
+    # Row 1 description
+    habit_d_label=ttk.Label(create_habit_frame,text='Habit Description :',style='Label.TLabel')
+    habit_d_label.grid(row=1,column=0,padx=10,pady=5,sticky='w')
+    habit_d_text=tk.Text(create_habit_frame,width=50,height=4)
+    habit_d_text.grid(row=1,column=1,padx=10,pady=5,sticky='w')
+
+    # Row 2 points per day
+    points_label=ttk.Label(create_habit_frame,text='Points Per Day :',style='Label.TLabel')
+    points_label.grid(row=2,column=0,padx=10,pady=5,sticky='w')
+    points_entry=ttk.Entry(create_habit_frame,style='Info.TEntry')
+    points_entry.grid(row=2,column=1,padx=10,pady=5,sticky='w')
+    points_entry.insert(tk.END,'10')
+
+    # Row 3 create button | clear button
+    create_button=ttk.Button(create_habit_frame,text='Create',command=create_habit_create)
+    create_button.grid(row=3,column=0,padx=10,pady=(10,5),sticky='w')
+
+    clear_button=ttk.Button(create_habit_frame,text='Clear',command=clear_habit_create)
+    clear_button.grid(row=3,column=1,padx=10,pady=(10,5),sticky='w')
+
     # creating info frame
     info_frame=ttk.Frame(display_frame)
-    info_frame.pack(side=tk.LEFT,fill='y')
+    info_frame.pack_forget()
     
     # creating lable that acts as headings
     headings=ttk.Label(info_frame,text='ID : Habit Name')
@@ -157,7 +279,6 @@ def habits_tab(dash,habits,user_instance):
     # creating a listbox for habits display
     habits_listbox=tk.Listbox(info_frame,selectmode=tk.SINGLE,bd=2,relief=tk.SUNKEN)
     habits_listbox.pack(padx=20,pady=10,fill=tk.BOTH,side='left')
-    habits_listbox.bind('<<ListboxSelect>>', display_info)
 
     # creating scrollbar for listbox
     scrollbar=ttk.Scrollbar(info_frame,orient=tk.VERTICAL,command=habits_listbox.yview)
@@ -166,14 +287,9 @@ def habits_tab(dash,habits,user_instance):
     # linking scrollbar to listbox
     habits_listbox.config(yscrollcommand=scrollbar.set)
 
-    # poputating active habits
-    user_active_habits=db.get_user_habits(user_instance.user_id)
-    user_inactive_habits=db.get_user_habits(user_instance.user_id,False)
-    populate_habits(user_active_habits)
-
     ### creating action frame
     action_frame=ttk.Frame(display_frame)
-    action_frame.pack(side=tk.LEFT,fill=tk.BOTH,expand=True)
+    action_frame.pack_forget()
 
     # Row 0 habit id and current streak (test)
     l_habit_id=ttk.Label(action_frame,text='Habit ID :',style='Label.TLabel')
@@ -192,7 +308,7 @@ def habits_tab(dash,habits,user_instance):
     v_habit=ttk.Label(action_frame,text='',style='Info.TLabel')
     v_habit.grid(row=1,column=2,columnspan=2,padx=10,pady=5,sticky='w')
 
-    # Row 2 frequency | edit frequency
+    # Row 2 frequency | edit frequency(menu)
     l_freq=ttk.Label(action_frame,text='Frequency :',style='Label.TLabel')
     l_freq.grid(row=2,column=0,columnspan=2,padx=10,pady=5,sticky='w')
     v_freq=ttk.Label(action_frame,text='',style='Info.TLabel')
@@ -223,18 +339,21 @@ def habits_tab(dash,habits,user_instance):
     edit_button=ttk.Button(action_frame,text='Edit',command=edit_habit)
     edit_button.grid_forget()
 
-    start_button=ttk.Button(action_frame,text='Start',command=start_habit)
-    start_button.grid_forget()
-
     save_button=ttk.Button(action_frame,text='Save', command=save_edit)
     save_button.grid_forget()
 
     cancel_button=ttk.Button(action_frame,text='Cancel',command= cancel_edit)
     cancel_button.grid_forget()
 
-    # Row 6 end button
+    # Row 6 end button(for active) | start(for inactive)
     end_button=ttk.Button(action_frame,text='End',command=end_habit)
     end_button.grid_forget()
+
+    start_button=ttk.Button(action_frame,text='Start',command=start_habit)
+    start_button.grid_forget()
+
+    # calling initial function
+    show_user_habits()
 
 
 

@@ -114,3 +114,22 @@ def start_user_habit(user_id,habit_id):
     parameters=(user_id,habit_id)
     data=execute(query,parameters)
 
+def get_other_habits(user_id):
+    '''function to get habits other than the user have
+    return type: list of tuples'''
+
+    query='select habit_id ,habit_name from habits where habit_id not in (select habit_id from user_habits where user_id=%s)'
+    parameter=(user_id,)
+    data=execute(query,parameter)
+
+    return data
+
+def create_habit(habit_name,habit_description,points_per_day):
+    '''Function to create a new habit'''
+
+    query='insert into habits (habit_name,habit_description,points_per_day) values (%s,%s,%s)'
+    parameters=(habit_name,habit_description,points_per_day)
+    data = execute(query,parameters)
+
+
+
