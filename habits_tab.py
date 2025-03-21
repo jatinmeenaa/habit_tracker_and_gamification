@@ -19,6 +19,7 @@ def habits_tab(dash,habits,user_instance):
         
         # modify layout
         create_habit_frame.pack_forget()
+        start_habit_frame.pack_forget()
         info_frame.pack(side=tk.LEFT,fill='y')
         action_frame.pack(side=tk.LEFT,fill=tk.BOTH,expand=True)
 
@@ -42,6 +43,7 @@ def habits_tab(dash,habits,user_instance):
         
         # modify layout
         create_habit_frame.pack_forget()
+        start_habit_frame.pack_forget()
         info_frame.pack(side=tk.LEFT,fill='y')
         action_frame.pack(side=tk.LEFT,fill=tk.BOTH,expand=True)
 
@@ -57,13 +59,20 @@ def habits_tab(dash,habits,user_instance):
     def start_habits():
         '''Modify tab to show habits to add it to user habits'''
         
-        def action_on_selection():
-            print('success')
+        def action_on_selection(event):
+            index=habits_listbox.curselection()[0]
+            habit_id=other_habits[index][0]
+            data=db.get_habit_info(habit_id)
+            # displaying the selected 
+            start_habit_n.config(text=data['habit_name'])
+            start_habit_d.config(text=data['habit_description'])
+
 
         # modify layout
         create_habit_frame.pack_forget()
+        action_frame.pack_forget()
         info_frame.pack(side=tk.LEFT,fill='y')
-        action_frame.pack(side=tk.LEFT,fill=tk.BOTH,expand=True)
+        start_habit_frame.pack(side=tk.LEFT,fill=tk.BOTH,expand=True)
 
         # guide label
         guide_label.config(text='Start New Habit')
@@ -80,6 +89,7 @@ def habits_tab(dash,habits,user_instance):
         # modify layout
         info_frame.pack_forget()
         action_frame.pack_forget()
+        start_habit_frame.pack_forget()
         create_habit_frame.pack(fill=tk.BOTH,expand=True)
 
         # guide label
@@ -197,12 +207,29 @@ def habits_tab(dash,habits,user_instance):
 
         habit_name=habit_n_entry.get().strip()
         habit_description=habit_d_text.get('1.0',tk.END).strip()
-        points_per_day=points_entry.get().strip
+        points_per_day=points_entry.get().strip()
         # error if no type matching
         db.create_habit(habit_name,habit_description,points_per_day)
         messagebox.showinfo('Habit Created Successfully',f'New Habit {habit_name} created successfully')
         clear_habit_create()
 
+    def start_new_habit():
+        if habits_listbox.curselection():
+            index=habits_listbox.curselection()[0]
+            habit_id=other_habits[index][0]
+            frequency=start_habit_f_mb.cget('text')
+            goal=start_habit_g.get('1.0',tk.END).strip()
+            db.start_new_user_habit(user_instance.user_id,habit_id,goal,frequency)
+            habits_listbox.delete(index)
+            other_habits.pop(index)
+            cancel_start_new_habit()
+
+    def cancel_start_new_habit():
+        habits_listbox.selection_clear(0,tk.END)
+        start_habit_n.config(text='')
+        start_habit_d.config(text='')
+        start_habit_g.delete('1.0',tk.END)
+        start_habit_f_mb.config(text='daily')
 
     # styling
     style = ttk.Style()
@@ -238,7 +265,7 @@ def habits_tab(dash,habits,user_instance):
     display_frame=ttk.Frame(habits)
     display_frame.pack(expand=True,fill=tk.BOTH)
     
-    # creating create habit frame
+    ## creating create habit frame
     create_habit_frame=ttk.Frame(display_frame)
     create_habit_frame.pack_forget()
 
@@ -268,7 +295,50 @@ def habits_tab(dash,habits,user_instance):
     clear_button=ttk.Button(create_habit_frame,text='Clear',command=clear_habit_create)
     clear_button.grid(row=3,column=1,padx=10,pady=(10,5),sticky='w')
 
-    # creating info frame
+    ## creating start habit frame
+    start_habit_frame=ttk.Frame(display_frame)
+    start_habit_frame.pack_forget()
+
+    # Row 0 habit_name
+    start_habit_n_label=ttk.Label(start_habit_frame,text='Habit Name :',style='Label.TLabel')
+    start_habit_n_label.grid(row=0,column=0,padx=10,pady=(30,5),sticky='w')
+    start_habit_n=ttk.Label(start_habit_frame,text='',style='Info.TLabel')
+    start_habit_n.grid(row=0,column=1,padx=10,pady=(30,5),sticky='w')
+
+    # Row 1 habit_description
+    start_habit_d_label=ttk.Label(start_habit_frame,text='Description :',style='Label.TLabel')
+    start_habit_d_label.grid(row=1,column=0,padx=10,pady=5,sticky='w')
+    start_habit_d=tk.Message(start_habit_frame,text='',background='light grey',foreground='dark green',width=300,font=('Arial',11))
+    start_habit_d.grid(row=1,column=1,padx=10,pady=5,sticky='w')
+
+    # Row 2 goal
+    start_habit_g_label=ttk.Label(start_habit_frame,text='Goal :',style='Label.TLabel')
+    start_habit_g_label.grid(row=2,column=0,padx=10,pady=5,sticky='w')
+    start_habit_g=tk.Text(start_habit_frame,height=4,width=30,wrap='word')
+    start_habit_g.grid(row=2,column=1,padx=10,pady=5,sticky='w')
+
+    # Row 3 frequency
+    start_habit_f_label=ttk.Label(start_habit_frame,text='Frequency :',style='Label.TLabel')
+    start_habit_f_label.grid(row=3,column=0,padx=10,pady=5,sticky='w')
+    start_habit_f_mb=ttk.Menubutton(start_habit_frame,text='daily')
+    start_habit_f_mb.grid(row=3,column=1,padx=10,pady=5,sticky='w')
+    start_habit_f_menu=tk.Menu(start_habit_f_mb,tearoff=0)
+    start_habit_f_menu.add_command(label='daily',command=lambda : start_habit_f_mb.config(text='daily'))
+    start_habit_f_menu.add_separator()
+    start_habit_f_menu.add_command(label='weekly',command=lambda : start_habit_f_mb.config(text='weekly'))
+    start_habit_f_menu.add_separator()
+    start_habit_f_menu.add_command(label='monthly',command=lambda : start_habit_f_mb.config(text='monthly'))
+    start_habit_f_mb.config(menu=start_habit_f_menu)
+
+    # Row 4 start button | cancel button
+    start_habit_start_b=ttk.Button(start_habit_frame,text='Start',command=start_new_habit)
+    start_habit_start_b.grid(row=4,column=0,padx=10,pady=10,sticky='w')
+    
+    start_habit_cancel_b=ttk.Button(start_habit_frame,text='Cancel',command=cancel_start_new_habit)
+    start_habit_cancel_b.grid(row=4,column=1,padx=10,pady=10,sticky='w')
+
+
+    ## creating info frame
     info_frame=ttk.Frame(display_frame)
     info_frame.pack_forget()
     
