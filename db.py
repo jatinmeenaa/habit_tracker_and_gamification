@@ -93,6 +93,16 @@ def get_user_habit_info(user_id,habit_id):
     data=execute(query,parameter,dictionary=True)
     return data[0]
 
+def get_habit_info(habit_id):
+    '''function to get info about any habit
+    return : dictionary'''
+
+    query='select habit_id,habit_name,habit_description,points_per_day from habits where habit_id=%s'
+    parameter=(habit_id,)
+    data=execute(query,parameter,True)
+    
+    return data[0]
+
 def edit_user_habit(user_id,habit_id,frequency,goal):
     '''function to edit frequency and goal of a user habit'''
 
@@ -113,6 +123,15 @@ def start_user_habit(user_id,habit_id):
     query='update user_habits set is_active=True,current_streak=0 where user_id=%s and habit_id=%s'
     parameters=(user_id,habit_id)
     data=execute(query,parameters)
+
+def start_new_user_habit(user_id,habit_id,goal,frequency='daily'):
+    '''function to start a new habit from habits
+    adds a new entry in user_habits'''
+    
+    query='insert into user_habits(user_id,habit_id,frequency,goal) values(%s,%s,%s,%s)'
+    parameters=(user_id,habit_id,frequency,goal)
+    data=execute(query,parameters)
+
 
 def get_other_habits(user_id):
     '''function to get habits other than the user have
