@@ -16,6 +16,7 @@ def habits_tab(dash,habits,user_instance):
             # action buttons
             edit_button.grid(row=5,column=0,padx=10,pady=5,sticky='w')
             end_button.grid(row=6,column=0,padx=10,pady=5,sticky='w')
+            start_button.grid_forget()
         
         # modify layout
         create_habit_frame.pack_forget()
@@ -308,7 +309,7 @@ def habits_tab(dash,habits,user_instance):
     # Row 1 habit_description
     start_habit_d_label=ttk.Label(start_habit_frame,text='Description :',style='Label.TLabel')
     start_habit_d_label.grid(row=1,column=0,padx=10,pady=5,sticky='w')
-    start_habit_d=tk.Message(start_habit_frame,text='',background='light grey',foreground='dark green',width=300,font=('Arial',11))
+    start_habit_d=tk.Message(start_habit_frame,text='',background='light grey',foreground='dark green',width=300,font=('Arial',10))
     start_habit_d.grid(row=1,column=1,padx=10,pady=5,sticky='w')
 
     # Row 2 goal

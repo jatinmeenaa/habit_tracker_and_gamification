@@ -5,6 +5,7 @@ from tkinter import ttk
 
 import user
 import db
+from home_tab import home_tab
 from profile_tab import profile_tab
 from habits_tab import habits_tab 
 
@@ -38,6 +39,7 @@ def dashboard(username):
     profile=ttk.Frame(notebook)
     notebook.add(profile,text='Profile')
 
+    home_tab(dash,home,user_instance)
     habits_tab(dash,habits,user_instance)
     profile_tab(dash,profile,user_instance)
     
