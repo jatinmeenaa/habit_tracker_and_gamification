@@ -296,50 +296,7 @@ def habits_tab(dash,habits,user_instance):
     clear_button=ttk.Button(create_habit_frame,text='Clear',command=clear_habit_create)
     clear_button.grid(row=3,column=1,padx=10,pady=(10,5),sticky='w')
 
-    ## creating start habit frame
-    start_habit_frame=ttk.Frame(display_frame)
-    start_habit_frame.pack_forget()
-
-    # Row 0 habit_name
-    start_habit_n_label=ttk.Label(start_habit_frame,text='Habit Name :',style='Label.TLabel')
-    start_habit_n_label.grid(row=0,column=0,padx=10,pady=(30,5),sticky='w')
-    start_habit_n=ttk.Label(start_habit_frame,text='',style='Info.TLabel')
-    start_habit_n.grid(row=0,column=1,padx=10,pady=(30,5),sticky='w')
-
-    # Row 1 habit_description
-    start_habit_d_label=ttk.Label(start_habit_frame,text='Description :',style='Label.TLabel')
-    start_habit_d_label.grid(row=1,column=0,padx=10,pady=5,sticky='w')
-    start_habit_d=tk.Message(start_habit_frame,text='',background='light grey',foreground='dark green',width=300,font=('Arial',10))
-    start_habit_d.grid(row=1,column=1,padx=10,pady=5,sticky='w')
-
-    # Row 2 goal
-    start_habit_g_label=ttk.Label(start_habit_frame,text='Goal :',style='Label.TLabel')
-    start_habit_g_label.grid(row=2,column=0,padx=10,pady=5,sticky='w')
-    start_habit_g=tk.Text(start_habit_frame,height=4,width=30,wrap='word')
-    start_habit_g.grid(row=2,column=1,padx=10,pady=5,sticky='w')
-
-    # Row 3 frequency
-    start_habit_f_label=ttk.Label(start_habit_frame,text='Frequency :',style='Label.TLabel')
-    start_habit_f_label.grid(row=3,column=0,padx=10,pady=5,sticky='w')
-    start_habit_f_mb=ttk.Menubutton(start_habit_frame,text='daily')
-    start_habit_f_mb.grid(row=3,column=1,padx=10,pady=5,sticky='w')
-    start_habit_f_menu=tk.Menu(start_habit_f_mb,tearoff=0)
-    start_habit_f_menu.add_command(label='daily',command=lambda : start_habit_f_mb.config(text='daily'))
-    start_habit_f_menu.add_separator()
-    start_habit_f_menu.add_command(label='weekly',command=lambda : start_habit_f_mb.config(text='weekly'))
-    start_habit_f_menu.add_separator()
-    start_habit_f_menu.add_command(label='monthly',command=lambda : start_habit_f_mb.config(text='monthly'))
-    start_habit_f_mb.config(menu=start_habit_f_menu)
-
-    # Row 4 start button | cancel button
-    start_habit_start_b=ttk.Button(start_habit_frame,text='Start',command=start_new_habit)
-    start_habit_start_b.grid(row=4,column=0,padx=10,pady=10,sticky='w')
-    
-    start_habit_cancel_b=ttk.Button(start_habit_frame,text='Cancel',command=cancel_start_new_habit)
-    start_habit_cancel_b.grid(row=4,column=1,padx=10,pady=10,sticky='w')
-
-
-    ## creating info frame
+    # creating info frame
     info_frame=ttk.Frame(display_frame)
     info_frame.pack_forget()
     
