@@ -47,3 +47,18 @@ create table user_logs(
                 constraint fk_user_habit_id_user_logs foreign key (user_habit_id) references user_habits(user_habit_id) on delete cascade,
                 constraint pk_user_logs primary key (user_habit_id,log_date)
 );
+
+set global event_scheduler=on;
+
+--Creating Events 
+
+create event habit_logging
+on schedule 
+    every 1 day 
+    starts current_date + interval 1 day
+do
+    insert into user_logs (user_habit_id,status)
+    select user_habit_id,'not done' from user_habits;
+
+
+
