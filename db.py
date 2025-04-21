@@ -132,7 +132,6 @@ def start_new_user_habit(user_id,habit_id,goal,frequency='daily'):
     parameters=(user_id,habit_id,frequency,goal)
     data=execute(query,parameters)
 
-
 def get_other_habits(user_id):
     '''function to get habits other than the user have
     return type: list of tuples'''
@@ -150,5 +149,18 @@ def create_habit(habit_name,habit_description,points_per_day):
     parameters=(habit_name,habit_description,points_per_day)
     data = execute(query,parameters)
 
+def get_user_habits_with_status(user_id,not_done=False,skipped=False,done=False):
+    '''Function to get the list of habits of user with specified status
+    return type: list of tuples'''
 
+    query='select uh.user_habit_id, h.habit_name from user_habits uh join user_logs ul on uh.user_habit_id=ul.user_habit_id join habits h on h.habit_id=uh.habit_id where ul.status= %s  and log_date=curdate() and uh.user_id= %s;'
+    if (not_done):
+        parameters=('not done',user_id)
+    elif (skipped):
+        parameters=('skipped',user_id)
+    elif (done):
+        parameters=('done',user_id)
 
+    data=execute(query,parameters)
+
+    return data

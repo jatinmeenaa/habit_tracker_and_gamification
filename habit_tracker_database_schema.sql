@@ -58,7 +58,7 @@ on schedule
     starts current_date + interval 1 day
 do
     insert into user_logs (user_habit_id,status)
-    select user_habit_id,'not done' from user_habits;
+    select user_habit_id,'not done' from user_habits where is_active = TRUE;
 
 
 
