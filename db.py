@@ -164,3 +164,19 @@ def get_user_habits_with_status(user_id,not_done=False,skipped=False,done=False)
     data=execute(query,parameters)
 
     return data
+
+def update_habit_status(user_habit_id_list,not_done=False,skipped=False,done=False):
+    '''Function to update the status of the habits in the log'''
+    
+    seq=','.join(['%s']*len(user_habit_id_list))
+    query=f'update user_logs set status = %s where user_habit_id in ({seq}) and log_date=curdate();'
+
+    if (not_done):
+        parameter=['not done']+user_habit_id_list
+    elif (skipped):
+        parameter=['skipped']+user_habit_id_list
+    elif (done):
+        parameter=['done']+user_habit_id_list
+
+    data=execute(query,parameter)
+    return data
