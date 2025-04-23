@@ -31,6 +31,19 @@ def execute(query,parameter=None,dictionary=False):
     conn.close()
     return data
 
+def execute_many(query,list_of_parameters):
+    '''Function to return multiple queries with different parameters
+    return type: None'''
+
+    conn=get_connection()
+    cursor=conn.cursor()
+    cursor.executemany(query,list_of_parameters)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return None
+
 def get_user(user_id=None,username=None):
     ''' Function for getting user data 
     args: user_id (none) , username (none)
@@ -169,14 +182,20 @@ def update_habit_status(user_habit_id_list,not_done=False,skipped=False,done=Fal
     '''Function to update the status of the habits in the log'''
     
     seq=','.join(['%s']*len(user_habit_id_list))
-    query=f'update user_logs set status = %s where user_habit_id in ({seq}) and log_date=curdate();'
+    query=f'update user_logs set status = %s , points = %s where user_habit_id in ({seq}) and log_date=curdate();'
 
     if (not_done):
-        parameter=['not done']+user_habit_id_list
+        parameter=['not done']+[0]+user_habit_id_list
     elif (skipped):
-        parameter=['skipped']+user_habit_id_list
+        parameter=['skipped']+[-1]+user_habit_id_list
     elif (done):
-        parameter=['done']+user_habit_id_list
+        parameter_query=f"select 'done'  , h.points_per_day, uh.current_streak , uh.user_habit_id from user_habits uh join habits h on uh.habit_id=h.habit_id where user_habit_id in ({seq});"
+        list_of_parameters=execute(parameter_query,user_habit_id_list)
+        
+        query='update user_logs set status = %s , points = %s + 0.1*%s where user_habit_id = %s and log_date = curdate();'
+
+        data=execute_many(query, list_of_parameters)
+        return data
 
     data=execute(query,parameter)
     return data

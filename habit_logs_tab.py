@@ -96,11 +96,11 @@ def habit_logs_tab(dash,habit_logs,user_instance):
     menubutton=ttk.Menubutton(menu_frame,text='Habit Status')
     menubutton.pack(side='right',padx=20,pady=10)
 
-    # habit status menu
+    # habit status menu  
     menu=tk.Menu(menubutton,tearoff=0)
-    menu.add_command(label='Not Done',command=show_not_done_habits)
-    menu.add_separator()
     menu.add_command(label='Skipped',command=show_skipped_habits)
+    menu.add_separator()
+    menu.add_command(label='Not Done',command=show_not_done_habits)
     menu.add_separator()
     menu.add_command(label='Done',command=show_done_habits)
 
@@ -169,4 +169,4 @@ def habit_logs_tab(dash,habit_logs,user_instance):
     not_done_button_s=ttk.Button(done_frame,text='Not Done',command= lambda : update_habit_log_status(user_done_habits,not_done=True))
     not_done_button_s.grid(row=2,column=1,padx=20,pady=10)
 
-    show_not_done_habits()
+    show_skipped_habits()

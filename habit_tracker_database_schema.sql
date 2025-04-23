@@ -9,7 +9,7 @@ create table users(
                 user_id int auto_increment,
                 username varchar(50) unique not null,
                 password_hash varchar(255) not null,
-                total_points int default 0,
+                total_points decimal(12,2) default 0,
                 email VARCHAR(100) UNIQUE NOT NULL,
                 created_at datetime default current_timestamp,
                 updated_at datetime default current_timestamp on update current_timestamp,
@@ -42,8 +42,8 @@ create table user_habits(
 create table user_logs(
                 user_habit_id int ,
                 log_date date default current_date,
-                status ENUM('not done','skipped','done') default 'not done',
-                points int default 0,
+                status ENUM('not done','skipped','done') default 'skipped',
+                points decimal(12,2) default -1,
                 constraint fk_user_habit_id_user_logs foreign key (user_habit_id) references user_habits(user_habit_id) on delete cascade,
                 constraint pk_user_logs primary key (user_habit_id,log_date)
 );
@@ -58,7 +58,7 @@ on schedule
     starts current_date + interval 1 day
 do
     insert into user_logs (user_habit_id,status)
-    select user_habit_id,'not done' from user_habits where is_active = TRUE;
+    select user_habit_id,'skipped' from user_habits where is_active = TRUE;
 
 
 
