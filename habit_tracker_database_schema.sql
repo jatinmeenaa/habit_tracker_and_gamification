@@ -50,7 +50,8 @@ create table user_logs(
 
 set global event_scheduler=on;
 
---Creating Events 
+
+--Event: habit_logging for adding habits to log at midnight i.e. start of the day
 
 create event habit_logging
 on schedule 
@@ -60,5 +61,96 @@ do
     insert into user_logs (user_habit_id,status)
     select user_habit_id,'skipped' from user_habits where is_active = TRUE;
 
+--Procedure: streak_total_points_update Updates streak count and calculates total_points
+
+DELIMITER $$
+
+CREATE PROCEDURE streak_total_points_update()
+BEGIN
+    DECLARE user_id INT;
+    DECLARE user_done INT DEFAULT 0;
+    DECLARE total_points DECIMAL(12,2) DEFAULT 0;
+    DECLARE habit_count INT DEFAULT 0;
+    DECLARE i INT DEFAULT 0;
+    DECLARE user_habit_id INT;
+    DECLARE status ENUM('done', 'skipped', 'not done');
+    DECLARE points DECIMAL(12,2) DEFAULT 0;
+
+    DECLARE user_cursor CURSOR FOR SELECT user_id, total_points FROM users;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET user_done = 1;
+    
+    CREATE TEMPORARY TABLE temp_data (
+        user_habit_id INT, 
+        status ENUM('done', 'skipped', 'not done'), 
+        points DECIMAL(12,2)
+    );
+    
+    OPEN user_cursor;
+
+    user_loop: LOOP
+        FETCH user_cursor INTO user_id, total_points;
+        IF user_done THEN
+            LEAVE user_loop;
+        END IF;
+        
+        DELETE FROM temp_data;
+        INSERT INTO temp_data (user_habit_id, status, points)
+        SELECT ul.user_habit_id, ul.status, ul.points
+        FROM user_logs ul 
+        JOIN user_habits uh ON ul.user_habit_id = uh.user_habit_id
+        WHERE ul.log_date = CURDATE() AND uh.user_id = user_id;
+        
+        SET i = 0;
+        SELECT COUNT(*) INTO habit_count FROM temp_data;
+        
+        WHILE i < habit_count DO
+            SELECT user_habit_id, status, points 
+            INTO user_habit_id, status, points 
+            FROM temp_data 
+            ORDER BY user_habit_id 
+            LIMIT i, 1;
+            
+            SET total_points = total_points + points;
+            
+            IF status = 'done' THEN
+                UPDATE user_habits 
+                SET current_streak = current_streak + 1 
+                WHERE user_habit_id = user_habit_id;
+            ELSE
+                UPDATE user_habits 
+                SET current_streak = 0 
+                WHERE user_habit_id = user_habit_id;
+            END IF;
+            
+            SET i = i + 1;
+        END WHILE;
+        
+        IF total_points < 0 THEN
+            SET total_points = 0;
+        END IF;
+        
+        UPDATE users 
+        SET total_points = total_points 
+        WHERE user_id = user_id;
+    END LOOP user_loop;
+
+    CLOSE user_cursor;
+END$$
+
+DELIMITER ;
+
+--Event: streak_update_event calls streak_total_points_update before midnight i.e. end of the day
+
+DELIMITER $$
+
+CREATE EVENT streak_update_event
+ON SCHEDULE EVERY 1 DAY
+STARTS TIMESTAMP(CURDATE()) + INTERVAL 23 HOUR + INTERVAL 59 MINUTE
+DO
+BEGIN
+    CALL streak_total_points_update();
+END$$
+
+DELIMITER ;
 
 
