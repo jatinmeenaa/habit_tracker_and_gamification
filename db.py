@@ -199,3 +199,47 @@ def update_habit_status(user_habit_id_list,not_done=False,skipped=False,done=Fal
 
     data=execute(query,parameter)
     return data
+
+def get_user_total_points(user_id):
+    '''function to get total points of a given user
+    return type: decimal(12,2)'''
+
+    parameter=(user_id,)
+    query='select total_points from users where user_id = %s;'
+
+    data=execute(query, parameter)
+
+    return data[0][0]
+
+def get_user_rank(user_id):
+    '''function to get user rank
+    return type: integer'''
+
+    user_total_points=get_user_total_points(user_id)
+    parameter=(user_total_points,)
+    query="select count(*)+1 from users u where u.total_points > %s;"
+
+    data = execute(query, parameter)
+
+    return data[0][0]
+
+def get_user_consistency(user_id):
+    '''function to get user_consistency
+    return type: decimal'''
+
+    query="select round((sum(case when status = 'done' then 1 else 0  end)/count(*))*100,2) from user_logs ul join user_habits uh on ul.user_habit_id=uh.user_habit_id where uh.user_id=%s;"
+    parameter=(user_id,)
+
+    data=execute(query,parameter)
+
+    return data[0][0]
+
+def get_leaders():
+    '''function to get top five(max) leaders
+    return type: list of tuples'''
+
+    query='select user_id,username,total_points from users order by total_points desc limit 5;'
+
+    data=execute(query)
+
+    return data

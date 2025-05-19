@@ -9,6 +9,7 @@ from home_tab import home_tab
 from profile_tab import profile_tab
 from habits_tab import habits_tab 
 from habit_logs_tab import habit_logs_tab
+from rewards_tab import rewards_tab
 
 def dashboard(username):
     dash=tk.Toplevel()
@@ -43,6 +44,7 @@ def dashboard(username):
     home_tab(dash,home,user_instance)
     habits_tab(dash,habits,user_instance)
     habit_logs_tab(dash,habit_log,user_instance)
+    rewards_tab(dash,rewards,user_instance)
     profile_tab(dash,profile,user_instance)
     
     dash.wait_window()
