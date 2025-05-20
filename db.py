@@ -7,8 +7,8 @@ def get_connection():
     returns connction object'''
     conn = m.connect(
         host="localhost",
-        user="root",
-        password="2830",
+        user="your_username",
+        password="your_password",
         database="Habit_Tracker",
         charset="utf8mb4",
         collation="utf8mb4_unicode_ci"
