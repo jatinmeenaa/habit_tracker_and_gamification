@@ -129,6 +129,7 @@ A Python-based Habit Tracker application with a gamified approach to boost consi
   Alert if the email is invalid.
 
 - **Registered Email**
+
   ![Registered Email Notification](assets/registered_email_notification.png)
   Alert if the email is already registered.
 
@@ -137,11 +138,14 @@ A Python-based Habit Tracker application with a gamified approach to boost consi
   New user registration form.
 
 - **Password Mismatch**
+
   ![Password Mismatch](assets/password_mismatch_notification.png)
   Notification if new password doesn't match with confirm password.
 
 - **Strong Password**
+
   ![Strong Password](assets/strong_password_notification.png)
+  
   Notification if entered password is not strong.
 
 ### Dashboard
